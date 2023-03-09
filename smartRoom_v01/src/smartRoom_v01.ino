@@ -42,6 +42,10 @@ const int PIXELCOUNT = 12;
 int i;
 //HUE
 
+//TIMER
+int currentTime;
+int lastSecond;
+
 
 int color;
 int encValue;
@@ -61,12 +65,12 @@ Button buttonE(ENBPIN);
 Adafruit_SSD1306 display(OLED_RESET);
 Adafruit_NeoPixel pixel(PIXELCOUNT, PIXELPIN, WS2812B);
 
+//TIMERS
+IoTTimer timer1;
+IoTTimer timer2;
 
-Servo myServo;
-IoTTimer timer;
-
+//FUNCTIONS
 void wemoSwitch(int oF, int wM);
-
 void pixelFill(int startingPixel, int endingPixel, int color);
 void oledWrite(int x, int y, int oO, char phrase);
 
@@ -101,50 +105,72 @@ void setup() {
 
 
 void loop() {
-    display.clearDisplay();
+    // display.clearDisplay();
 
     if(button4.isClicked()) {
         onOFF4 = !onOFF4;
     }
 
-    if(onOFF4 && !onOFF5) {
-        // timer.startTimer(5000);
+    if(onOFF4 &&!onOFF5) {
+        // pixel.clear();
+        // pixel.show();
         display.setTextSize(1);
         display.setTextColor(WHITE);
         display.setCursor(0,0);
         display.printf("HELLO  LOVE\n]");
         display.display();
+        pixel.clear();
         pixelFill(0,16,0xFF0000);
-        timer.startTimer(5000);
+        pixel.show();
+        Serial.printf("button 4 is pressed\r");
     }
+       // pixel.show();
 
 
-    if(!onOFF4) {
-        display.clearDisplay();
-        display.display();
-        pixelFill(0,16,0x000000);
-    }
+    // if(!onOFF4) {
+    //     display.clearDisplay();
+    //     display.display();
+    //     pixel.clear();
+    //     pixelFill(0,16,0x000000);
+    //     pixel.show();
+
+    // }
 
     if(button5.isClicked()) {
         onOFF5 = !onOFF5;
     }
 
+    if(!onOFF4 && !onOFF5) {
+        
+        currentTime=millis();
+        if((currentTime - lastSecond) >10000) {
+            pixelFill(4, 12, 0x00FF00);
+            pixel.show();
+            lastSecond=millis();
+        }
 
-    if(!onOFF5) {
+        else {
+            pixel.clear();
+            pixel.show();
+        }
+
         display.clearDisplay();
-        display.display();
+        display.setCursor(20,40);
+        display.printf("AUTO");
+        display.display();   
+
     }
 
+
+
     if(onOFF4 && onOFF5) {
-        display.setTextSize(2);
-        display.setTextColor(WHITE);
         display.setCursor(0,20);
         display.printf("WHAT DO U\n WANT");
         display.display();
-
-        pixel.clear();
-        pixelFill(0, 12, 0xFFFFFF);
-        pixel.show();
+        Serial.printf("Buttons are clickED\r");
+        // pixel.clear();
+        // pixelFill(0, 12, 0xFFFFFF);
+        // pixel.show();
 
         if(button1.isClicked()) {
             onOFF1 = !onOFF1;
