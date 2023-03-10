@@ -63,6 +63,8 @@ int brightness;
 // float button1, button2, button3, button4, button5, button6;
 // bool other1, other2, other3, other4, other5, other6;
 bool onOFF1, onOFF2, onOFF3, onOFF4, onOFF5, onOFFE;
+bool timerTOG1, timerTOG2;
+bool doyouloveme;
 
 Button button1(BT1PIN);
 Button button2(BT2PIN);
@@ -90,6 +92,8 @@ SYSTEM_MODE(MANUAL);
 void setup() {
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     display.clearDisplay();
+    display.setRotation(2);
+
     pixel.begin();
     pixel.show();
     pixel.setBrightness(10);
@@ -107,85 +111,94 @@ void setup() {
 
     while(WiFi.connecting()) {
         Serial.printf(",");
+        display.drawCircle(60,30,30,HIGH);
+        display.printf("i am trying\nto get it\ntogether");
+        display.display();
     }
     delay(1000);
     Serial.printf("\n\n");
+
 }
 
 
 void loop() {
     // display.clearDisplay();
+    tone(SPKRPIN, 0);
 
     if(button4.isClicked()) {
         onOFF4 = !onOFF4;
     }
 
+
+
     if(onOFF4 &&!onOFF5) {
-        // pixel.clear();
-        // pixel.show();
-        display.setTextSize(1);
+        display.clearDisplay();
+        display.setTextSize(2);
         display.setTextColor(WHITE);
         display.setCursor(0,0);
-        display.printf("HELLO  LOVE\n]");
+        display.printf("HELLO\nLOVE");
         display.display();
         pixel.clear();
-        pixelFill(0,16,0xFF0000);
+        pixelFill(0,6,0xFFFFFF);
         pixel.show();
         Serial.printf("button 4 is pressed\r");
     }
-       // pixel.show();
-
-
-    // if(!onOFF4) {
-    //     display.clearDisplay();
-    //     display.display();
-    //     pixel.clear();
-    //     pixelFill(0,16,0x000000);
-    //     pixel.show();
-
-    // }
 
     if(button5.isClicked()) {
         onOFF5 = !onOFF5;
     }
 
     if(!onOFF4 && !onOFF5) {
-        
         currentTime=millis();
-        if((currentTime - lastSecond) >10000) {
-            pixelFill(4, 12, 0x00FF00);
-            pixel.show();
+        
+        if((currentTime - lastSecond) >5000) {
+            doyouloveme = !doyouloveme;
             lastSecond=millis();
         }
 
+        if(doyouloveme) {
+            pixelFill(0, 12, 0xFFA500);
+            pixel.show();
+            setHue(BULB1,false,0,0,0);
+            //tone(SPKRPIN, 1500);
+            display.clearDisplay();
+            display.setTextSize(2);
+            display.setTextColor(WHITE);
+            display.clearDisplay();
+            display.setCursor(10,20);
+            display.printf("DO YOU\nLOVE ME?");
+            display.display();   
+        }
         else {
             pixel.clear();
             pixel.show();
+            setHue(BULB1,true,HueRainbow[color%7],brightness,255);
+            tone(SPKRPIN, 0);
+            display.clearDisplay();
+            display.display();
         }
-
-        display.clearDisplay();
-        display.setCursor(20,40);
-        display.printf("AUTO");
-        display.display();   
-
     }
 
-
+    // if(timer1.isTimerReady()) {
+    //     pixel.clear();
+    //     pixelFill(4, 12, 0xFFA500);
+    //     pixel.show();            
+    // }
 
     if(onOFF4 && onOFF5) {
+        display.clearDisplay();
         display.setCursor(0,20);
-        display.printf("WHAT DO U\n WANT");
+        display.printf("WHAT DO U\nNEED<3");
         display.display();
         Serial.printf("Buttons are clickED\r");
-        // pixel.clear();
-        // pixelFill(0, 12, 0xFFFFFF);
-        // pixel.show();
+        pixel.clear();
+        pixelFill(0, 12, 0xFFFFFF);
+        pixel.show();
 
         if(button1.isClicked()) {
             onOFF1 = !onOFF1;
         }
         wemoSwitch(onOFF1, WEMO1);
-        oledWrite(0, 50, onOFF1, POPPING);
 
         if(button2.isClicked()) {
             onOFF2 = !onOFF2;
@@ -228,6 +241,7 @@ void loop() {
             setHue(BULB1,false,0,0,0);
         }
     }
+
 }
 
 
